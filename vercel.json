@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd andiamo-2026 && npm run build",
+  "outputDirectory": "andiamo-2026/build",
+  "installCommand": "cd andiamo-2026 && npm install --legacy-peer-deps",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
