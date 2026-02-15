@@ -1,79 +1,52 @@
 // ============================================
-// Andiamo 2026 - Data Types
+// Italy Honeymoon - Data Types
 // ============================================
 
-export interface TripInfo {
-  title: string;
-  travelers: string[];
-  startDate: string;
-  endDate: string;
-}
-
-export interface FixedTransport {
+export interface ItineraryDay {
   id: string;
-  type: 'flight' | 'train';
-  direction: 'IN' | 'OUT';
-  flightNo: string;
-  depTime: string;
-  arrTime: string;
-  depAirport: string;
-  arrAirport: string;
-  seat?: string;
-}
-
-export interface Accommodation {
-  name: string;
-  link: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  price: number;
-  checkIn?: string;
-  checkOut?: string;
-}
-
-export interface Spot {
-  id: string;
-  name: string;
-  category: 'sightseeing' | 'restaurant' | 'shopping' | 'photo' | 'activity' | 'transport';
-  note?: string;
-  link?: string;
-  time?: string;
-  completed: boolean;
-}
-
-export interface DailyPlan {
-  id: string;
-  date: string;
   city: string;
-  transport?: string;
-  accommodation?: Accommodation;
-  spots: Spot[];
-  notes?: string;
+  date: string;
+  title: string;
+  morning: string;
+  afternoon: string;
+  evening: string;
+  note: string;
 }
 
-export interface WishlistItem {
+export interface CityGroup {
+  name: string;
+  eng: string;
+  color: string;
+  days: string[];
+}
+
+export interface ListItem {
+  id: string;
+  name: string;
+  city: string;
+  link: string;
+  createdAt: number;
+}
+
+export interface Photo {
   id: string;
   url: string;
-  category: 'hotel' | 'restaurant' | 'tour' | 'shopping' | 'transport' | 'other';
-  note: string;
-  addedBy: string;
-  confirmed: boolean;
-  targetDate?: string;
+  createdAt: number;
 }
 
-export interface TipItem {
-  id: string;
-  category: 'reservation' | 'safety' | 'shopping' | 'update';
-  title: string;
-  content: string;
-  checked: boolean;
+export interface TripState {
+  itinerary: Record<string, ItineraryDay>;
+  restaurants: ListItem[];
+  shopping: ListItem[];
+  photos: Photo[];
 }
 
-export interface TripData {
-  tripInfo: TripInfo;
-  fixedTransport: FixedTransport[];
-  dailyPlans: DailyPlan[];
-  wishlist: WishlistItem[];
-  tips: TipItem[];
-}
-
-export type TabType = 'flights' | 'plans' | 'wishlist' | 'tips';
+export type TripAction =
+  | { type: 'SET_ITINERARY'; payload: Record<string, ItineraryDay> }
+  | { type: 'UPDATE_ITINERARY_DAY'; payload: { dayId: string; data: Partial<ItineraryDay> } }
+  | { type: 'ADD_RESTAURANT'; payload: ListItem }
+  | { type: 'DELETE_RESTAURANT'; payload: string }
+  | { type: 'ADD_SHOPPING'; payload: ListItem }
+  | { type: 'DELETE_SHOPPING'; payload: string }
+  | { type: 'ADD_PHOTO'; payload: Photo }
+  | { type: 'DELETE_PHOTO'; payload: string };

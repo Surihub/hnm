@@ -1,36 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TripProvider } from './context/TripContext';
 import Header from './components/Header';
-import FlightSchedule from './components/FlightSchedule';
-import DailyPlans from './components/DailyPlans';
-import Wishlist from './components/Wishlist';
-import Tips from './components/Tips';
-import { TabType } from './types';
-import './App.css';
+import CityItinerary from './components/CityItinerary';
+import RestaurantList from './components/RestaurantList';
+import ShoppingList from './components/ShoppingList';
+import PhotoGallery from './components/PhotoGallery';
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<TabType>('plans');
-
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'flights':
-        return <FlightSchedule />;
-      case 'plans':
-        return <DailyPlans />;
-      case 'wishlist':
-        return <Wishlist />;
-      case 'tips':
-        return <Tips />;
-    }
-  };
-
   return (
-    <div className="app">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="main-content">{renderTab()}</main>
-      <footer className="app-footer">
-        <p>Andiamo 2026 - Built with love for your Italian honeymoon</p>
-      </footer>
+    <div className="pb-24">
+      <Header />
+      <main className="max-w-md mx-auto px-5 py-6 space-y-10">
+        <CityItinerary />
+        <RestaurantList />
+        <ShoppingList />
+        <PhotoGallery />
+      </main>
     </div>
   );
 }

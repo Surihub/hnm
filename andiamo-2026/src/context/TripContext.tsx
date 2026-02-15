@@ -1,179 +1,57 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { TripData, DailyPlan, WishlistItem, TipItem, Spot, Accommodation } from '../types';
-import { seedData } from '../data/seedData';
-import { v4 as uuidv4 } from 'uuid';
+import { TripState, TripAction } from '../types';
+import { initialState } from '../data/seedData';
 
-// ── Actions ──
-type Action =
-  | { type: 'LOAD_DATA'; payload: TripData }
-  | { type: 'ADD_SPOT'; payload: { planId: string; spot: Omit<Spot, 'id' | 'completed'> } }
-  | { type: 'UPDATE_SPOT'; payload: { planId: string; spotId: string; spot: Partial<Spot> } }
-  | { type: 'DELETE_SPOT'; payload: { planId: string; spotId: string } }
-  | { type: 'TOGGLE_SPOT'; payload: { planId: string; spotId: string } }
-  | { type: 'REORDER_SPOTS'; payload: { planId: string; spots: Spot[] } }
-  | { type: 'UPDATE_ACCOMMODATION'; payload: { planId: string; accommodation: Accommodation } }
-  | { type: 'UPDATE_PLAN_NOTES'; payload: { planId: string; notes: string } }
-  | { type: 'ADD_WISHLIST'; payload: Omit<WishlistItem, 'id' | 'confirmed'> }
-  | { type: 'UPDATE_WISHLIST'; payload: { id: string; item: Partial<WishlistItem> } }
-  | { type: 'DELETE_WISHLIST'; payload: string }
-  | { type: 'CONFIRM_WISHLIST'; payload: string }
-  | { type: 'TOGGLE_TIP'; payload: string }
-  | { type: 'UPDATE_TRAVELERS'; payload: string[] };
-
-// ── Reducer ──
-function tripReducer(state: TripData, action: Action): TripData {
+function tripReducer(state: TripState, action: TripAction): TripState {
   switch (action.type) {
-    case 'LOAD_DATA':
-      return action.payload;
+    case 'SET_ITINERARY':
+      return { ...state, itinerary: action.payload };
 
-    case 'ADD_SPOT': {
-      const { planId, spot } = action.payload;
+    case 'UPDATE_ITINERARY_DAY': {
+      const { dayId, data } = action.payload;
       return {
         ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId
-            ? { ...plan, spots: [...plan.spots, { ...spot, id: uuidv4(), completed: false }] }
-            : plan
-        ),
+        itinerary: {
+          ...state.itinerary,
+          [dayId]: { ...state.itinerary[dayId], ...data },
+        },
       };
     }
 
-    case 'UPDATE_SPOT': {
-      const { planId, spotId, spot } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId
-            ? {
-                ...plan,
-                spots: plan.spots.map((s) => (s.id === spotId ? { ...s, ...spot } : s)),
-              }
-            : plan
-        ),
-      };
-    }
+    case 'ADD_RESTAURANT':
+      return { ...state, restaurants: [...state.restaurants, action.payload] };
 
-    case 'DELETE_SPOT': {
-      const { planId, spotId } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId
-            ? { ...plan, spots: plan.spots.filter((s) => s.id !== spotId) }
-            : plan
-        ),
-      };
-    }
+    case 'DELETE_RESTAURANT':
+      return { ...state, restaurants: state.restaurants.filter((r) => r.id !== action.payload) };
 
-    case 'TOGGLE_SPOT': {
-      const { planId, spotId } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId
-            ? {
-                ...plan,
-                spots: plan.spots.map((s) =>
-                  s.id === spotId ? { ...s, completed: !s.completed } : s
-                ),
-              }
-            : plan
-        ),
-      };
-    }
+    case 'ADD_SHOPPING':
+      return { ...state, shopping: [...state.shopping, action.payload] };
 
-    case 'REORDER_SPOTS': {
-      const { planId, spots } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId ? { ...plan, spots } : plan
-        ),
-      };
-    }
+    case 'DELETE_SHOPPING':
+      return { ...state, shopping: state.shopping.filter((s) => s.id !== action.payload) };
 
-    case 'UPDATE_ACCOMMODATION': {
-      const { planId, accommodation } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId ? { ...plan, accommodation } : plan
-        ),
-      };
-    }
+    case 'ADD_PHOTO':
+      return { ...state, photos: [...state.photos, action.payload] };
 
-    case 'UPDATE_PLAN_NOTES': {
-      const { planId, notes } = action.payload;
-      return {
-        ...state,
-        dailyPlans: state.dailyPlans.map((plan) =>
-          plan.id === planId ? { ...plan, notes } : plan
-        ),
-      };
-    }
-
-    case 'ADD_WISHLIST':
-      return {
-        ...state,
-        wishlist: [
-          ...state.wishlist,
-          { ...action.payload, id: uuidv4(), confirmed: false },
-        ],
-      };
-
-    case 'UPDATE_WISHLIST':
-      return {
-        ...state,
-        wishlist: state.wishlist.map((item) =>
-          item.id === action.payload.id ? { ...item, ...action.payload.item } : item
-        ),
-      };
-
-    case 'DELETE_WISHLIST':
-      return {
-        ...state,
-        wishlist: state.wishlist.filter((item) => item.id !== action.payload),
-      };
-
-    case 'CONFIRM_WISHLIST':
-      return {
-        ...state,
-        wishlist: state.wishlist.map((item) =>
-          item.id === action.payload ? { ...item, confirmed: !item.confirmed } : item
-        ),
-      };
-
-    case 'TOGGLE_TIP':
-      return {
-        ...state,
-        tips: state.tips.map((tip) =>
-          tip.id === action.payload ? { ...tip, checked: !tip.checked } : tip
-        ),
-      };
-
-    case 'UPDATE_TRAVELERS':
-      return {
-        ...state,
-        tripInfo: { ...state.tripInfo, travelers: action.payload },
-      };
+    case 'DELETE_PHOTO':
+      return { ...state, photos: state.photos.filter((p) => p.id !== action.payload) };
 
     default:
       return state;
   }
 }
 
-// ── Context ──
 interface TripContextType {
-  state: TripData;
-  dispatch: React.Dispatch<Action>;
+  state: TripState;
+  dispatch: React.Dispatch<TripAction>;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'andiamo2026_trip_data';
+const STORAGE_KEY = 'italy_honeymoon_v2';
 
 export function TripProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(tripReducer, seedData, (initial) => {
+  const [state, dispatch] = useReducer(tripReducer, initialState, (initial) => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {

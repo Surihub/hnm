@@ -1,55 +1,45 @@
-import React from 'react';
-import { useTrip } from '../context/TripContext';
-import { TabType } from '../types';
+import React, { useEffect } from 'react';
 
-interface HeaderProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
-}
+declare const lucide: { createIcons: () => void };
 
-export default function Header({ activeTab, onTabChange }: HeaderProps) {
-  const { state } = useTrip();
-  const { tripInfo } = state;
+export default function Header() {
+  useEffect(() => {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }, []);
 
-  const tabs: { key: TabType; label: string; icon: string }[] = [
-    { key: 'flights', label: 'Flights', icon: 'flight' },
-    { key: 'plans', label: 'Plans', icon: 'calendar_today' },
-    { key: 'wishlist', label: 'Wishlist', icon: 'bookmark' },
-    { key: 'tips', label: 'Tips', icon: 'lightbulb' },
-  ];
-
-  const daysUntil = Math.ceil(
-    (new Date(tripInfo.startDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
-    <header className="header">
-      <div className="header-top">
-        <h1 className="app-title">{tripInfo.title}</h1>
-        <div className="trip-meta">
-          <span className="travelers">
-            {tripInfo.travelers.join(' & ')}
-          </span>
-          <span className="date-range">
-            {tripInfo.startDate} ~ {tripInfo.endDate}
-          </span>
-          {daysUntil > 0 && (
-            <span className="dday">D-{daysUntil}</span>
-          )}
+    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-100">
+      <div className="max-w-md mx-auto px-5 py-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i data-lucide="palmtree" className="text-emerald-500"></i>
+            이탈리아 허니문
+          </h1>
+          <p className="text-[10px] text-blue-500 font-medium">
+            로컬 저장 활성
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => scrollToSection('section-shopping')}
+            className="p-2 bg-gray-50 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <i data-lucide="shopping-bag" className="w-5 h-5"></i>
+          </button>
+          <button
+            onClick={() => scrollToSection('section-food')}
+            className="p-2 bg-gray-50 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <i data-lucide="utensils" className="w-5 h-5"></i>
+          </button>
         </div>
       </div>
-      <nav className="tab-nav">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
-            onClick={() => onTabChange(tab.key)}
-          >
-            <span className="material-icons">{tab.icon}</span>
-            <span className="tab-label">{tab.label}</span>
-          </button>
-        ))}
-      </nav>
     </header>
   );
 }
